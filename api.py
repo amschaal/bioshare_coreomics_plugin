@@ -21,11 +21,13 @@ class SubmissionShareViewSet(mixins.CreateModelMixin,
         obj = self.get_object()
         return Response({'permissions': obj.get_permissions()})
     @action(detail=True, methods=['POST'])
-    def set_permissions(self, request, pk=None):
+    def share_with_participants(self, request, pk=None):
         obj = self.get_object()
-        perms = request.data
-        print('set perms', perms)
-        return Response({'permissions': obj.set_permissions()})
+        return Response({'permissions': obj.share_with_participants()})
+    @action(detail=True, methods=['POST'])
+    def share(self, request, pk=None):
+        obj = self.get_object()
+        return Response({'permissions': obj.share(contacts=True)})
 #     def create(self, request, *args, **kwargs):
 #         return viewsets.ModelViewSet.create(self, request, *args, **kwargs)
 #     def create(self, request, *args, **kwargs):

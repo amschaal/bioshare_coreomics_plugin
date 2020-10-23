@@ -47,6 +47,8 @@ response = urllib.request.urlopen(req)
 #             raise Exception('Unable to create share')
 
 class SubmissionShare(models.Model):
+    ADMIN_PERMISSIONS = ["view_share_files","download_share_files","write_to_share","delete_share_files","admin"]
+    VIEWER_PERMISSIONS = ["view_share_files","download_share_files"]
     submission = models.OneToOneField(Submission, primary_key=True, on_delete=models.CASCADE)
 #     labshare = models.ForeignKey(LabShare)
     bioshare_id = models.CharField(max_length=15,null=True,blank=True)
@@ -57,19 +59,27 @@ class SubmissionShare(models.Model):
         if not self.bioshare_id:
             self.bioshare_id = self.submission.lab.bioshare_account.create_share('{}: {}'.format('{}, {}'.format(self.submission.pi_last_name, self.submission.pi_first_name),self.submission.internal_id), 'Generated from {}'.format(self.submission.internal_id))
         instance = super(SubmissionShare, self).save(*args, **kwargs)
-        self.set_permissions()
+        self.share_with_participants()
         return instance
         
     @property
     def url(self):
         return VIEW_URL.format(id=self.bioshare_id)
     def set_permissions(self, perms=None):
-        if not perms:
-            perms = {"test": True, "groups": {}, "users":dict([(p.email,["view_share_files","download_share_files","write_to_share","delete_share_files","admin"]) for p in self.submission.participants.all()]), "email":True}
-#         perms = {"json": perms} #silly api
-        print('perms', perms)
+#         if not perms:
+#             perms = {"test": True, "groups": {}, "users":dict([(p.email,["view_share_files","download_share_files","write_to_share","delete_share_files","admin"]) for p in self.submission.participants.all()]), "email":True}
+#         print('perms', perms)
 #       perms = {"users":{"jdoe@domain.com":["view_share_files","download_share_files","write_to_share","delete_share_files","admin"]},"groups":{"1":["view_share_files","download_share_files","write_to_share"]},"email":true}
         return bioshare_post(SET_PERMISSIONS_URL.format(id=self.bioshare_id), self.submission.lab.bioshare_account.auth_token, perms)
+    def share_with_participants(self):
+        perms = {"groups": {}, "users":dict([(p.email, self.ADMIN_PERMISSIONS) for p in self.submission.participants.all()]), "email":True}
+        return self.set_permissions(perms)
+    def share(self, contacts=False):
+        emails = [self.submission.email, self.submission.pi_email]
+        if contacts:
+            emails += [c.email for c in self.submission.contacts.all()]
+        perms = {"groups": {}, "users":dict([(email,self.VIEWER_PERMISSIONS) for email in emails]), "email":True}
+        return self.set_permissions(perms)
     def get_permissions(self):
         return bioshare_get(GET_PERMISSIONS_URL.format(id=self.bioshare_id), self.submission.lab.bioshare_account.auth_token)
 # def create_submission_share_directory(sender,instance,**kwargs):
