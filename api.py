@@ -5,6 +5,8 @@ from rest_framework.viewsets import GenericViewSet
 from bioshare.serializers import SubmissionShareSerializer,\
     BioshareAccountSerializer
 from rest_framework.decorators import action
+from rest_framework.authentication import SessionAuthentication,\
+    TokenAuthentication
 
 class SubmissionShareViewSet(mixins.CreateModelMixin,
                    mixins.RetrieveModelMixin,
@@ -14,9 +16,9 @@ class SubmissionShareViewSet(mixins.CreateModelMixin,
     serializer_class = SubmissionShareSerializer
     model = SubmissionShare
 #     filter_fields = ('submission',)
-#     permission_classes = []
+    authentication_classes = [SessionAuthentication, TokenAuthentication]
     queryset = SubmissionShare.objects.all()
-    @action(detail=True, methods=['GET'], permission_classes=[])
+    @action(detail=True, methods=['GET'])
     def permissions(self, request, pk=None):
         obj = self.get_object()
         return Response({'permissions': obj.get_permissions()})
