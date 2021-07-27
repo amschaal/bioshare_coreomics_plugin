@@ -1,5 +1,6 @@
 import urllib, json
 def bioshare_request(url, token, data=None):
+    print('bioshare url', url)
     params = json.dumps(data).encode('utf8')
     if data:
         req = urllib.request.Request(url, data=params)

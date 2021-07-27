@@ -59,7 +59,8 @@ class SubmissionShare(models.Model):
         if not self.bioshare_id:
             self.bioshare_id = self.submission.lab.bioshare_account.create_share('{}: {}'.format('{}, {}'.format(self.submission.pi_last_name, self.submission.pi_first_name),self.submission.internal_id), 'Generated from {}'.format(self.submission.internal_id))
         instance = super(SubmissionShare, self).save(*args, **kwargs)
-        self.share_with_participants()
+        if settings.BIOSHARE_SETTINGS.get('AUTO_SHARE_PARTICIPANTS', False):
+            self.share_with_participants()
         return instance
         
     @property
