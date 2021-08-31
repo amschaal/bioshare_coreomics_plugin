@@ -1,13 +1,15 @@
 import urllib, json
+from django.conf import settings
+from bioshare import CREATE_URL
 def bioshare_request(url, token, data=None):
-    print('bioshare url', url)
+    print('bioshare url', url, 'token', token)
     params = json.dumps(data).encode('utf8')
     if data:
         req = urllib.request.Request(url, data=params)
     else:
         req = urllib.request.Request(url)
     req.add_header('Content-Type', 'application/json')
-    req.add_header('Authorization', 'Token %s'%token)
+    req.add_header('Authorization', 'Token {}'.format(token))
     try:
         response = urllib.request.urlopen(req)
         if response.getcode() == 200:
@@ -24,3 +26,19 @@ def bioshare_post(url, token, data):
 
 def bioshare_get(url, token):
     return bioshare_request(url, token)
+
+def create_share(token, name, description=None):
+#         @todo: replace with real API call
+#         import string, random
+#         return ''.join(random.choice(string.ascii_lowercase + string.digits) for x in range(15))
+        """
+newConditions = {"con1":40, "con2":20, "con3":99, "con4":40, "password":"1234"} 
+params = json.dumps(newConditions).encode('utf8')
+req = urllib.request.Request(conditionsSetURL, data=params,
+                             headers={'content-type': 'application/json'})
+response = urllib.request.urlopen(req)
+        """
+        description = description or 'Genome Center LIMS generated share'
+        filesystem = settings.BIOSHARE_SETTINGS['DEFAULT_FILESYSTEM']
+        params = {"name":name,"notes":description,"filesystem":filesystem,'read_only':False}
+        return bioshare_post(CREATE_URL, token, params)['id']

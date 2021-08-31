@@ -6,7 +6,7 @@ import json
 from bioshare import CREATE_URL, VIEW_URL, GET_PERMISSIONS_URL, SET_PERMISSIONS_URL
 from django.conf import settings
 from dnaorder.models import Lab, Submission
-from bioshare.requests import bioshare_post, bioshare_get
+from bioshare.requests import bioshare_post, bioshare_get, create_share
 
 
 class BioshareAccount(models.Model):
@@ -58,7 +58,10 @@ class SubmissionShare(models.Model):
 #         unique_together = (('labshare','folder'),('project','labshare'))
     def save(self, *args, **kwargs):
         if not self.bioshare_id:
-            self.bioshare_id = self.submission.lab.bioshare_account.create_share('{}: {}'.format('{}, {}'.format(self.submission.pi_last_name, self.submission.pi_first_name),self.submission.internal_id), 'Generated from {}'.format(self.submission.internal_id))
+            self.bioshare_id = create_share(self.submission.lab.plugins['bioshare']['private']['token'], '{}: {}'.format('{}, {}'.format(self.submission.pi_last_name, self.submission.pi_first_name),self.submission.internal_id), 'Generated from {}'.format(self.submission.internal_id))
+#             self.bioshare_id = self.submission.lab.bioshare_account.create_share('{}: {}'.format('{}, {}'.format(self.submission.pi_last_name, self.submission.pi_first_name),self.submission.internal_id), 'Generated from {}'.format(self.submission.internal_id))
+        if not self.id:
+            self.id = '{}_{}'.format(self.submission.pk, self.bioshare_id)
         instance = super(SubmissionShare, self).save(*args, **kwargs)
         if settings.BIOSHARE_SETTINGS.get('AUTO_SHARE_PARTICIPANTS', False):
             self.share_with_participants()

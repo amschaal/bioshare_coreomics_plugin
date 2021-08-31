@@ -6,7 +6,7 @@ class SubmissionShareSerializer(serializers.ModelSerializer):
     class Meta:
         model = SubmissionShare
         exclude = []
-        read_only_fields = ('url', 'bioshare_id')
+        read_only_fields = ('url', 'bioshare_id', 'id')
 
 class BioshareAccountSerializer(serializers.ModelSerializer):
     class Meta:
