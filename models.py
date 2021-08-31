@@ -49,7 +49,8 @@ response = urllib.request.urlopen(req)
 class SubmissionShare(models.Model):
     ADMIN_PERMISSIONS = ["view_share_files","download_share_files","write_to_share","delete_share_files","admin"]
     VIEWER_PERMISSIONS = ["view_share_files","download_share_files"]
-    submission = models.OneToOneField(Submission, primary_key=True, on_delete=models.CASCADE)
+    id = models.CharField(max_length=30,null=True,blank=True)
+    submission = models.ForeignKey(Submission, primary_key=True, on_delete=models.CASCADE)
 #     labshare = models.ForeignKey(LabShare)
     bioshare_id = models.CharField(max_length=15,null=True,blank=True)
     sub_folder = models.CharField(max_length=100, null=True, blank=True)
