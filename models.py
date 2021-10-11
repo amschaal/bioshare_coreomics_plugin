@@ -75,7 +75,7 @@ class SubmissionShare(models.Model):
 #             perms = {"test": True, "groups": {}, "users":dict([(p.email,["view_share_files","download_share_files","write_to_share","delete_share_files","admin"]) for p in self.submission.participants.all()]), "email":True}
 #         print('perms', perms)
 #       perms = {"users":{"jdoe@domain.com":["view_share_files","download_share_files","write_to_share","delete_share_files","admin"]},"groups":{"1":["view_share_files","download_share_files","write_to_share"]},"email":true}
-        return bioshare_post(SET_PERMISSIONS_URL.format(id=self.bioshare_id), self.submission.lab.bioshare_account.auth_token, perms)
+        return bioshare_post(SET_PERMISSIONS_URL.format(id=self.bioshare_id), self.submission.lab.plugins['bioshare']['private']['token'], perms)
     def share_with_participants(self):
         perms = {"groups": {}, "users":dict([(p.email, self.ADMIN_PERMISSIONS) for p in self.submission.participants.all()]), "email":True}
         return self.set_permissions(perms)
@@ -86,7 +86,7 @@ class SubmissionShare(models.Model):
         perms = {"groups": {}, "users":dict([(email,self.VIEWER_PERMISSIONS) for email in emails]), "email":True}
         return self.set_permissions(perms)
     def get_permissions(self):
-        return bioshare_get(GET_PERMISSIONS_URL.format(id=self.bioshare_id), self.submission.lab.bioshare_account.auth_token)
+        return bioshare_get(GET_PERMISSIONS_URL.format(id=self.bioshare_id), self.submission.lab.plugins['bioshare']['private']['token'])
 # def create_submission_share_directory(sender,instance,**kwargs):
 #     if hasattr(instance, 'id'):
 #         try:

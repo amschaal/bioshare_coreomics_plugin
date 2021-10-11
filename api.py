@@ -8,14 +8,17 @@ from rest_framework.decorators import action
 from rest_framework.authentication import SessionAuthentication,\
     TokenAuthentication
 
-class SubmissionShareViewSet(mixins.CreateModelMixin,
-                   mixins.RetrieveModelMixin,
-                   mixins.UpdateModelMixin,
-                   mixins.DestroyModelMixin,
-                   GenericViewSet):
+# mixins.CreateModelMixin,
+#                    mixins.RetrieveModelMixin,
+#                    mixins.UpdateModelMixin,
+#                    mixins.ListModelMixin,
+#                    mixins.DestroyModelMixin,
+#                    GenericViewSet
+
+class SubmissionShareViewSet(viewsets.ModelViewSet):
     serializer_class = SubmissionShareSerializer
     model = SubmissionShare
-#     filter_fields = ('submission',)
+    filter_fields = ('submission',)
     authentication_classes = [SessionAuthentication, TokenAuthentication]
     queryset = SubmissionShare.objects.all()
     @action(detail=True, methods=['GET'])
@@ -30,6 +33,10 @@ class SubmissionShareViewSet(mixins.CreateModelMixin,
     def share(self, request, pk=None):
         obj = self.get_object()
         return Response({'permissions': obj.share(contacts=True)})
+    def list(self, request, *args, **kwargs):
+#         if 'submission' not in request.query_params:
+#             return Response({'status':'error', 'message': 'You must provide a submission id as an argument (submission=<submission_id>).'},status=403)
+        return viewsets.ModelViewSet.list(self, request, *args, **kwargs)
 #     def create(self, request, *args, **kwargs):
 #         return viewsets.ModelViewSet.create(self, request, *args, **kwargs)
 #     def create(self, request, *args, **kwargs):
