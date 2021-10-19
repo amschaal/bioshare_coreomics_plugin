@@ -52,13 +52,17 @@ class SubmissionShare(models.Model):
     id = models.CharField(max_length=30, primary_key=True)
     submission = models.ForeignKey(Submission, on_delete=models.CASCADE)
 #     labshare = models.ForeignKey(LabShare)
+    name = models.CharField(max_length=50)
+    notes = models.TextField(null=True)
     bioshare_id = models.CharField(max_length=15,null=True,blank=True)
     sub_folder = models.CharField(max_length=100, null=True, blank=True)
 #     class Meta:
 #         unique_together = (('labshare','folder'),('project','labshare'))
     def save(self, *args, **kwargs):
         if not self.bioshare_id:
-            self.bioshare_id = create_share(self.submission.lab.plugins['bioshare']['private']['token'], '{}: {}'.format('{}, {}'.format(self.submission.pi_last_name, self.submission.pi_first_name),self.submission.internal_id), 'Generated from {}'.format(self.submission.internal_id))
+            name = self.name or '{}: {}'.format('{}, {}'.format(self.submission.pi_last_name, self.submission.pi_first_name),self.submission.internal_id)
+            notes = self.notes or 'Generated from {}'.format(self.submission.internal_id)
+            self.bioshare_id = create_share(self.submission.lab.plugins['bioshare']['private']['token'], name, notes)
 #             self.bioshare_id = self.submission.lab.bioshare_account.create_share('{}: {}'.format('{}, {}'.format(self.submission.pi_last_name, self.submission.pi_first_name),self.submission.internal_id), 'Generated from {}'.format(self.submission.internal_id))
         if not self.id:
             self.id = '{}_{}'.format(self.submission.pk, self.bioshare_id)
