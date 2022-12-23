@@ -3,11 +3,10 @@ from django.db import models
 import urllib
 import json
 # from bioshare.utils import get_real_files, get_symlinks, remove_sub_paths
-from bioshare import CREATE_URL, VIEW_URL, GET_PERMISSIONS_URL, SET_PERMISSIONS_URL
+from .plugin import CREATE_URL, VIEW_URL, GET_PERMISSIONS_URL, SET_PERMISSIONS_URL
 from django.conf import settings
 from dnaorder.models import Lab, Submission
-from bioshare.requests import bioshare_post, bioshare_get, create_share
-
+from .requests import bioshare_post, bioshare_get, create_share
 
 class BioshareAccount(models.Model):
     lab = models.OneToOneField(Lab, related_name="bioshare_account", primary_key=True, on_delete=models.CASCADE)
@@ -104,4 +103,3 @@ class SubmissionShare(models.Model):
 #     if not os.path.exists(instance.directory()):
 #         os.makedirs(instance.directory())
 # pre_save.connect(create_project_share_directory, ProjectShare)
-    

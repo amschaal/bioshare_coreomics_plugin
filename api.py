@@ -1,8 +1,8 @@
 from rest_framework import viewsets, status, mixins
-from bioshare.models import SubmissionShare, BioshareAccount
+from .models import SubmissionShare, BioshareAccount
 from rest_framework.response import Response
 from rest_framework.viewsets import GenericViewSet
-from bioshare.serializers import SubmissionShareSerializer,\
+from .serializers import SubmissionShareSerializer,\
     BioshareAccountSerializer
 from rest_framework.decorators import action
 from rest_framework.authentication import SessionAuthentication,\

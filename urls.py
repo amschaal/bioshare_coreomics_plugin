@@ -1,5 +1,5 @@
 # from django.conf.urls import include, url
-from bioshare.api import SubmissionShareViewSet, BioshareAccountViewSet
+from .api import SubmissionShareViewSet, BioshareAccountViewSet
 
 from rest_framework import routers
 # from django.urls import path, include
