@@ -1,6 +1,6 @@
 import urllib, json
 from django.conf import settings
-from . import CREATE_URL
+from .config import CREATE_URL
 def bioshare_request(url, token, data=None):
     print('bioshare url', url, 'token', token)
     params = json.dumps(data).encode('utf8')

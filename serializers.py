@@ -1,5 +1,5 @@
 from rest_framework import serializers
-from bioshare.models import SubmissionShare, BioshareAccount
+from .models import SubmissionShare, BioshareAccount
 
 class SubmissionShareSerializer(serializers.ModelSerializer):
     url = serializers.CharField(read_only=True)

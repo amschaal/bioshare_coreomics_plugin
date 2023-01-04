@@ -3,7 +3,7 @@ from django.db import models
 import urllib
 import json
 # from bioshare.utils import get_real_files, get_symlinks, remove_sub_paths
-from .plugin import CREATE_URL, VIEW_URL, GET_PERMISSIONS_URL, SET_PERMISSIONS_URL
+from .config import CREATE_URL, VIEW_URL, GET_PERMISSIONS_URL, SET_PERMISSIONS_URL
 from django.conf import settings
 from dnaorder.models import Lab, Submission
 from .requests import bioshare_post, bioshare_get, create_share

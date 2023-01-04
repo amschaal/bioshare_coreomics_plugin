@@ -22,15 +22,15 @@ class SubmissionShareViewSet(viewsets.ModelViewSet):
     authentication_classes = [SessionAuthentication, TokenAuthentication]
     queryset = SubmissionShare.objects.all()
     @action(detail=True, methods=['GET'])
-    def permissions(self, request, pk=None):
+    def permissions(self, request, pk=None, submission_id=None):
         obj = self.get_object()
         return Response({'permissions': obj.get_permissions()})
     @action(detail=True, methods=['POST'])
-    def share_with_participants(self, request, pk=None):
+    def share_with_participants(self, request, pk=None, submission_id=None):
         obj = self.get_object()
         return Response({'permissions': obj.share_with_participants()})
     @action(detail=True, methods=['POST'])
-    def share(self, request, pk=None):
+    def share(self, request, pk=None, submission_id=None):
         obj = self.get_object()
         return Response({'permissions': obj.share(contacts=True)})
     def list(self, request, *args, **kwargs):
