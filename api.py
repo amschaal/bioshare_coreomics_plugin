@@ -1,4 +1,6 @@
 from rest_framework import viewsets, status, mixins
+
+from plugins import plugin_submission_decorator
 from .models import SubmissionShare, BioshareAccount
 from rest_framework.response import Response
 from rest_framework.viewsets import GenericViewSet
@@ -18,19 +20,20 @@ from rest_framework.authentication import SessionAuthentication,\
 class SubmissionShareViewSet(viewsets.ModelViewSet):
     serializer_class = SubmissionShareSerializer
     model = SubmissionShare
-    filter_fields = ('submission',)
+    filterset_fields = ('submission',)
     authentication_classes = [SessionAuthentication, TokenAuthentication]
     queryset = SubmissionShare.objects.all()
     @action(detail=True, methods=['GET'])
-    def permissions(self, request, pk=None, submission_id=None):
+    # @plugin_submission_decorator(permissions=['VIEW'], all=True)
+    def permissions(self, request, pk=None, submission_id=None, plugin_id=None):
         obj = self.get_object()
         return Response({'permissions': obj.get_permissions()})
     @action(detail=True, methods=['POST'])
-    def share_with_participants(self, request, pk=None, submission_id=None):
+    def share_with_participants(self, request, pk=None, submission_id=None, plugin_id=None):
         obj = self.get_object()
         return Response({'permissions': obj.share_with_participants()})
     @action(detail=True, methods=['POST'])
-    def share(self, request, pk=None, submission_id=None):
+    def share(self, request, pk=None, submission_id=None, plugin_id=None):
         obj = self.get_object()
         return Response({'permissions': obj.share(contacts=True)})
     def list(self, request, *args, **kwargs):
