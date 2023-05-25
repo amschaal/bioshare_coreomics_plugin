@@ -31,11 +31,13 @@ class SubmissionShareViewSet(viewsets.ModelViewSet):
     @action(detail=True, methods=['POST'])
     def share_with_participants(self, request, pk=None, submission_id=None, plugin_id=None):
         obj = self.get_object()
-        return Response({'permissions': obj.share_with_participants()})
+        email = request.data.get('email', False)
+        return Response({'permissions': obj.share_with_participants(email=email)})
     @action(detail=True, methods=['POST'])
     def share(self, request, pk=None, submission_id=None, plugin_id=None):
         obj = self.get_object()
-        return Response({'permissions': obj.share(contacts=True)})
+        email = request.data.get('email', False)
+        return Response({'permissions': obj.share(contacts=True, email=email)})
     def list(self, request, *args, **kwargs):
 #         if 'submission' not in request.query_params:
 #             return Response({'status':'error', 'message': 'You must provide a submission id as an argument (submission=<submission_id>).'},status=403)
