@@ -1,6 +1,7 @@
 from rest_framework import viewsets, status, mixins
 
 from plugins import plugin_submission_decorator
+from .permissions import SubmissionStaffPermission
 from .models import SubmissionShare, BioshareAccount
 from rest_framework.response import Response
 from rest_framework.viewsets import GenericViewSet
@@ -23,24 +24,24 @@ class SubmissionShareViewSet(viewsets.ModelViewSet):
     filterset_fields = ('submission',)
     authentication_classes = [SessionAuthentication, TokenAuthentication]
     queryset = SubmissionShare.objects.all()
-    @action(detail=True, methods=['GET'])
+    @action(detail=True, methods=['GET'], permission_classes=[SubmissionStaffPermission])
     # @plugin_submission_decorator(permissions=['VIEW'], all=True)
     def permissions(self, request, pk=None, submission_id=None, plugin_id=None):
         obj = self.get_object()
         return Response({'permissions': obj.get_permissions()})
-    @action(detail=True, methods=['POST'])
+    @action(detail=True, methods=['POST'], permission_classes=[SubmissionStaffPermission])
     def share_with_participants(self, request, pk=None, submission_id=None, plugin_id=None):
         obj = self.get_object()
         email = request.data.get('email', False)
         return Response({'permissions': obj.share_with_participants(email=email)})
-    @action(detail=True, methods=['POST'])
+    @action(detail=True, methods=['POST'], permission_classes=[SubmissionStaffPermission])
     def share(self, request, pk=None, submission_id=None, plugin_id=None):
         obj = self.get_object()
         email = request.data.get('email', False)
         return Response({'permissions': obj.share(contacts=True, email=email)})
     def list(self, request, *args, **kwargs):
-#         if 'submission' not in request.query_params:
-#             return Response({'status':'error', 'message': 'You must provide a submission id as an argument (submission=<submission_id>).'},status=403)
+        # if 'submission' not in request.query_params:
+        #     return Response({'status':'error', 'message': 'You must provide a submission id as an argument (submission=<submission_id>).'},status=403)
         return viewsets.ModelViewSet.list(self, request, *args, **kwargs)
 #     def create(self, request, *args, **kwargs):
 #         return viewsets.ModelViewSet.create(self, request, *args, **kwargs)
