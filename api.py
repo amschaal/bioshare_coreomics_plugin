@@ -1,4 +1,5 @@
 from rest_framework import viewsets, status, mixins
+from dnaorder.models import Submission
 
 from plugins import plugin_submission_decorator
 from .permissions import SubmissionStaffPermission
@@ -24,6 +25,12 @@ class SubmissionShareViewSet(viewsets.ModelViewSet):
     filterset_fields = ('submission',)
     authentication_classes = [SessionAuthentication, TokenAuthentication]
     queryset = SubmissionShare.objects.all()
+    def get_queryset(self):
+        # print('get_queryset',self.kwargs)
+        self.submission_id = self.kwargs.get('submission_id')
+        self.plugin_id = self.kwargs.get('plugin_id')
+        self.submission = Submission.objects.get(id=self.submission_id)
+        return SubmissionShare.objects.filter(submission=self.submission)
     @action(detail=True, methods=['GET'], permission_classes=[SubmissionStaffPermission])
     # @plugin_submission_decorator(permissions=['VIEW'], all=True)
     def permissions(self, request, pk=None, submission_id=None, plugin_id=None):
