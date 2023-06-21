@@ -39,6 +39,8 @@ req = urllib.request.Request(conditionsSetURL, data=params,
 response = urllib.request.urlopen(req)
         """
         description = description or 'Genome Center LIMS generated share'
-        filesystem = settings.BIOSHARE_SETTINGS['DEFAULT_FILESYSTEM']
-        params = {"name":name,"notes":description,"filesystem":filesystem,'read_only':False}
+        filesystem = settings.BIOSHARE_SETTINGS.get('DEFAULT_FILESYSTEM',None)
+        params = {"name":name,"notes":description,'read_only':False}
+        if filesystem:
+            params['filesystem'] = filesystem
         return bioshare_post(CREATE_URL, token, params)['id']

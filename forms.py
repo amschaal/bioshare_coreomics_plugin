@@ -14,7 +14,7 @@ form = {
             "type": "string",
             "title": "Bioshare URL",
             "description": "Please enter Bioshare base URL",
-            "pattern": "^https://.+$"
+            "pattern": "^https?://.+$"
 #             "error_message": "Please enter a URL starting with 'https://'",
 #             "validators": [
 #               {
