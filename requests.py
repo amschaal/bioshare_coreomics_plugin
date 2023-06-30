@@ -1,3 +1,4 @@
+import re
 import urllib, json
 from django.conf import settings
 from .config import CREATE_URL
@@ -20,7 +21,14 @@ def bioshare_request(url, token, data=None):
     except urllib.request.HTTPError as e:
         error_message = e.read()
         raise Exception(error_message)
-    
+
+def parse_share_id(url):
+    SHARE_REGEX = r'^https?:\/\/.+\/bioshare\/view\/(?P<share>[a-zA-Z0-9]{15})\/?$'
+    matches = re.match(SHARE_REGEX, url)
+    if not matches:
+        return None
+    return matches[1]
+
 def bioshare_post(url, token, data):
     return bioshare_request(url, token, data)
 

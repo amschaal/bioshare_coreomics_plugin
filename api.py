@@ -1,7 +1,9 @@
-from rest_framework import viewsets, status, mixins
+from rest_framework import viewsets, status, mixins, exceptions
 from dnaorder.models import Submission
 
 from plugins import plugin_submission_decorator
+from plugins.bioshare.config import GET_PERMISSIONS_URL
+from plugins.bioshare.requests import bioshare_get, parse_share_id
 from .permissions import SubmissionStaffPermission
 from .models import SubmissionShare, BioshareAccount
 from rest_framework.response import Response
@@ -50,6 +52,18 @@ class SubmissionShareViewSet(viewsets.ModelViewSet):
         # if 'submission' not in request.query_params:
         #     return Response({'status':'error', 'message': 'You must provide a submission id as an argument (submission=<submission_id>).'},status=403)
         return viewsets.ModelViewSet.list(self, request, *args, **kwargs)
+    @action(detail=False, methods=['POST', 'GET'], permission_classes=[SubmissionStaffPermission])
+    def import_share(self, request, submission_id=None, plugin_id=None):
+        url = request.query_params.get('url')#request.data.get('url')
+        share_id = parse_share_id(url)
+        if not share_id:
+            raise exceptions.NotAcceptable('Bad URL.  Ensure that the URL contains the 15 digit alphanumeric share ID.')
+        submission = Submission.objects.get(id=submission_id)
+        try:
+            permissions = bioshare_get(GET_PERMISSIONS_URL.format(id=share_id), submission.lab.plugins['bioshare']['private']['token'])
+        except:
+            raise exceptions.APIException('Unable to import share')
+        return Response({'url':url, 'result': share_id, 'permissions': permissions})
 #     def create(self, request, *args, **kwargs):
 #         return viewsets.ModelViewSet.create(self, request, *args, **kwargs)
 #     def create(self, request, *args, **kwargs):
