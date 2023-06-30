@@ -1,7 +1,7 @@
 import re
 import urllib, json
 from django.conf import settings
-from .config import CREATE_URL
+from .config import CREATE_URL, GET_URL
 def bioshare_request(url, token, data=None):
     print('bioshare url', url, 'token', token)
     params = json.dumps(data).encode('utf8')
@@ -34,6 +34,10 @@ def bioshare_post(url, token, data):
 
 def bioshare_get(url, token):
     return bioshare_request(url, token)
+
+def get_share(token, id):
+    url = GET_URL.format(id=id)
+    return bioshare_get(url, token)
 
 def create_share(token, name, description=None):
 #         @todo: replace with real API call

@@ -3,7 +3,7 @@ from dnaorder.models import Submission
 
 from plugins import plugin_submission_decorator
 from plugins.bioshare.config import GET_PERMISSIONS_URL
-from plugins.bioshare.requests import bioshare_get, parse_share_id
+from plugins.bioshare.requests import bioshare_get, get_share, parse_share_id
 from .permissions import SubmissionStaffPermission
 from .models import SubmissionShare, BioshareAccount
 from rest_framework.response import Response
@@ -60,10 +60,13 @@ class SubmissionShareViewSet(viewsets.ModelViewSet):
             raise exceptions.NotAcceptable('Bad URL.  Ensure that the URL contains the 15 digit alphanumeric share ID.')
         submission = Submission.objects.get(id=submission_id)
         try:
-            permissions = bioshare_get(GET_PERMISSIONS_URL.format(id=share_id), submission.lab.plugins['bioshare']['private']['token'])
-        except:
-            raise exceptions.APIException('Unable to import share')
-        return Response({'url':url, 'result': share_id, 'permissions': permissions})
+            share = get_share(submission.lab.plugins['bioshare']['private']['token'], share_id)#bioshare_get(GET_PERMISSIONS_URL.format(id=share_id), submission.lab.plugins['bioshare']['private']['token'])
+            obj = SubmissionShare(bioshare_id = share_id, name=share['name'], notes=share['notes'], submission=submission)
+            obj.save()
+            serializer = self.get_serializer(obj)
+            return Response(serializer.data)
+        except Exception as e:
+            raise exceptions.APIException('Unable to import share. Exception: '+ str(e))
 #     def create(self, request, *args, **kwargs):
 #         return viewsets.ModelViewSet.create(self, request, *args, **kwargs)
 #     def create(self, request, *args, **kwargs):
