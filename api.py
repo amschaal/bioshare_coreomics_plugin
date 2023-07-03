@@ -52,9 +52,9 @@ class SubmissionShareViewSet(viewsets.ModelViewSet):
         # if 'submission' not in request.query_params:
         #     return Response({'status':'error', 'message': 'You must provide a submission id as an argument (submission=<submission_id>).'},status=403)
         return viewsets.ModelViewSet.list(self, request, *args, **kwargs)
-    @action(detail=False, methods=['POST', 'GET'], permission_classes=[SubmissionStaffPermission])
+    @action(detail=False, methods=['POST'], permission_classes=[SubmissionStaffPermission])
     def import_share(self, request, submission_id=None, plugin_id=None):
-        url = request.query_params.get('url')#request.data.get('url')
+        url = request.data.get('url')
         share_id = parse_share_id(url)
         if not share_id:
             raise exceptions.NotAcceptable('Bad URL.  Ensure that the URL contains the 15 digit alphanumeric share ID.')
