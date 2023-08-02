@@ -1,10 +1,10 @@
-from rest_framework import viewsets, status, mixins, exceptions
+from rest_framework import viewsets, status, mixins, exceptions, permissions as drf_permissions
 from dnaorder.models import Submission
 
 from plugins import plugin_submission_decorator
 from plugins.bioshare.config import GET_PERMISSIONS_URL
 from plugins.bioshare.requests import bioshare_get, get_share, parse_share_id
-from .permissions import SubmissionStaffPermission
+from .permissions import ListOnlyPermission, SubmissionStaffPermission
 from .models import SubmissionShare, BioshareAccount
 from rest_framework.response import Response
 from rest_framework.viewsets import GenericViewSet
@@ -26,7 +26,10 @@ class SubmissionShareViewSet(viewsets.ModelViewSet):
     model = SubmissionShare
     filterset_fields = ('submission',)
     authentication_classes = [SessionAuthentication, TokenAuthentication]
+    permission_classes = [ListOnlyPermission|SubmissionStaffPermission]
     queryset = SubmissionShare.objects.all()
+    def get_permissions(self):
+        return super().get_permissions()
     def get_queryset(self):
         # print('get_queryset',self.kwargs)
         self.submission_id = self.kwargs.get('submission_id')
@@ -48,10 +51,10 @@ class SubmissionShareViewSet(viewsets.ModelViewSet):
         obj = self.get_object()
         email = request.data.get('email', False)
         return Response({'permissions': obj.share(contacts=True, email=email)})
-    def list(self, request, *args, **kwargs):
-        # if 'submission' not in request.query_params:
-        #     return Response({'status':'error', 'message': 'You must provide a submission id as an argument (submission=<submission_id>).'},status=403)
-        return viewsets.ModelViewSet.list(self, request, *args, **kwargs)
+    # def list(self, request, *args, permission_classes=[drf_permissions.AllowAny], **kwargs):
+    #     # if 'submission' not in request.query_params:
+    #     #     return Response({'status':'error', 'message': 'You must provide a submission id as an argument (submission=<submission_id>).'},status=403)
+    #     return viewsets.ModelViewSet.list(self, request, *args, **kwargs)
     @action(detail=False, methods=['POST'], permission_classes=[SubmissionStaffPermission])
     def import_share(self, request, submission_id=None, plugin_id=None):
         url = request.data.get('url')
