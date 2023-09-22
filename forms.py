@@ -1,3 +1,5 @@
+from plugins import RESTRICT_TO_LAB, RESTRICT_TO_INSTITUTION
+
 form = {
     'private': {
         "order": [
@@ -29,7 +31,8 @@ form = {
             "type": "string",
             "title": "Bioshare API Token",
             "validators": [],
-            "description": "Please enter Bioshare API Token"
+            "description": "Please enter Bioshare API Token",
+            "restrict_to": [RESTRICT_TO_LAB]
           },
         }
         },
@@ -57,13 +60,7 @@ form = {
 #                 }
 #               }
 #             ]
-          },
-          "token": {
-            "type": "string",
-            "title": "Bioshare API Token",
-            "validators": [],
-            "description": "Please enter Bioshare API Token"
-          },
+          }
         }
         }
     }
