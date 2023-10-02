@@ -25,7 +25,8 @@ req = urllib.request.Request(conditionsSetURL, data=params,
 response = urllib.request.urlopen(req)
         """
         description = description or 'Genome Center LIMS generated share'
-        filesystem = settings.BIOSHARE_SETTINGS['DEFAULT_FILESYSTEM']
+        # filesystem = settings.BIOSHARE_SETTINGS['DEFAULT_FILESYSTEM']
+        filesystem = self.submission.lab.plugins['bioshare']['private'].get('filesystem')
         params = {"name":name,"notes":description,"filesystem":filesystem,'read_only':False}
         return bioshare_post(CREATE_URL, self.auth_token, params)['id']
 #         req = urllib.request.Request(CREATE_URL, data=params)
@@ -61,13 +62,15 @@ class SubmissionShare(models.Model):
         if not self.bioshare_id:
             name = self.name or '{}: {}'.format('{}, {}'.format(self.submission.pi_last_name, self.submission.pi_first_name),self.submission.internal_id)
             notes = self.notes or 'Generated from {}'.format(self.submission.internal_id)
-            self.bioshare_id = create_share(self.submission.lab.plugins['bioshare']['private']['token'], name, notes)
+            filesystem = self.submission.lab.plugins['bioshare']['private'].get('filesystem')
+            self.bioshare_id = create_share(self.submission.lab.plugins['bioshare']['private']['token'], name, notes, filesystem)
 #             self.bioshare_id = self.submission.lab.bioshare_account.create_share('{}: {}'.format('{}, {}'.format(self.submission.pi_last_name, self.submission.pi_first_name),self.submission.internal_id), 'Generated from {}'.format(self.submission.internal_id))
         if not self.id:
             self.id = '{}_{}'.format(self.submission.pk, self.bioshare_id)
         instance = super(SubmissionShare, self).save(*args, **kwargs)
         if settings.BIOSHARE_SETTINGS.get('AUTO_SHARE_PARTICIPANTS', False):
             self.share_with_participants()
+        self.share_with_group()
         return instance
         
     @property
@@ -82,6 +85,11 @@ class SubmissionShare(models.Model):
     def share_with_participants(self, email=False):
         perms = {"groups": {}, "users":dict([(p.email, self.ADMIN_PERMISSIONS) for p in self.submission.participants.all()]), "email":email}
         return self.set_permissions(perms)
+    def share_with_group(self, email=False):
+        group = self.submission.lab.plugins['bioshare']['private'].get('bioshare_group','')
+        if group:
+            perms = {"groups": {group: self.VIEWER_PERMISSIONS}, "email":email}
+            return self.set_permissions(perms)
     def share(self, contacts=False, email=False):
         emails = [self.submission.email, self.submission.pi_email]
         if contacts:

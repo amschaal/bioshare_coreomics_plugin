@@ -39,7 +39,7 @@ def get_share(token, id):
     url = GET_URL.format(id=id)
     return bioshare_get(url, token)
 
-def create_share(token, name, description=None):
+def create_share(token, name, description=None, filesystem=None):
 #         @todo: replace with real API call
 #         import string, random
 #         return ''.join(random.choice(string.ascii_lowercase + string.digits) for x in range(15))
@@ -51,7 +51,7 @@ req = urllib.request.Request(conditionsSetURL, data=params,
 response = urllib.request.urlopen(req)
         """
         description = description or 'Genome Center LIMS generated share'
-        filesystem = settings.BIOSHARE_SETTINGS.get('DEFAULT_FILESYSTEM',None)
+        # filesystem = settings.BIOSHARE_SETTINGS.get('DEFAULT_FILESYSTEM',None)
         params = {"name":name,"notes":description,'read_only':False}
         if filesystem:
             params['filesystem'] = filesystem

@@ -4,37 +4,50 @@ form = {
     'private': {
         "order": [
           "url",
-          "token"
+          "token",
+          "bioshare_group",
+          "filesystem"
         ],
         "required": [
           "url",
           "token",
+          "filesystem"
         ],
         "layout": {},
-        "properties": {
-          "url": {
-            "type": "string",
-            "title": "Bioshare URL",
-            "description": "Please enter Bioshare base URL",
-            "pattern": "^https?://.+$"
-#             "error_message": "Please enter a URL starting with 'https://'",
-#             "validators": [
-#               {
-#                 "id": "regex",
-#                 "options": {
-#                   "regex": "testregex"
-#                 }
-#               }
-#             ]
-          },
-          "token": {
-            "type": "string",
-            "title": "Bioshare API Token",
-            "validators": [],
-            "description": "Please enter Bioshare API Token",
-            "restrict_to": [RESTRICT_TO_LAB]
-          },
-        }
+          "properties": {
+            "url": {
+              "type": "string",
+              "title": "Bioshare URL",
+              "description": "Please enter Bioshare base URL",
+              "pattern": "^https?://.+$"
+  #             "error_message": "Please enter a URL starting with 'https://'",
+  #             "validators": [
+  #               {
+  #                 "id": "regex",
+  #                 "options": {
+  #                   "regex": "testregex"
+  #                 }
+  #               }
+  #             ]
+            },
+            "token": {
+              "type": "string",
+              "title": "Bioshare API Token",
+              "description": "Please enter Bioshare API Token",
+              "restrict_to": [RESTRICT_TO_LAB]
+            },
+            "bioshare_group": {
+              "type": "string",
+              "title": "Bioshare Group",
+              "description": "Optionally enter the name of a Bioshare group that should be given read access.",
+              "restrict_to": [RESTRICT_TO_LAB]
+            },
+            "filesystem": {
+              "type": "number",
+              "title": "Filesystem",
+              "description": "Which Bioshare filesystem should be used for creating shares (use integer primary key)?"
+            }
+          }
         },
     'public': {
         "order": [
