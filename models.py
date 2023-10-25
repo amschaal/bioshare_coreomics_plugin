@@ -70,7 +70,10 @@ class SubmissionShare(models.Model):
         instance = super(SubmissionShare, self).save(*args, **kwargs)
         if settings.BIOSHARE_SETTINGS.get('AUTO_SHARE_PARTICIPANTS', False):
             self.share_with_participants()
-        self.share_with_group()
+        try:
+            self.share_with_group()
+        except:
+            pass
         return instance
         
     @property
