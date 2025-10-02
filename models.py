@@ -84,7 +84,7 @@ class SubmissionShare(models.Model):
 #             perms = {"test": True, "groups": {}, "users":dict([(p.email,["view_share_files","download_share_files","write_to_share","delete_share_files","admin"]) for p in self.submission.participants.all()]), "email":True}
 #         print('perms', perms)
 #       perms = {"users":{"jdoe@domain.com":["view_share_files","download_share_files","write_to_share","delete_share_files","admin"]},"groups":{"1":["view_share_files","download_share_files","write_to_share"]},"email":true}
-        return bioshare_post(SET_PERMISSIONS_URL.format(id=self.bioshare_id), self.submission.lab.plugins['bioshare']['private']['token'], perms)
+        return bioshare_post(SET_PERMISSIONS_URL.format(id=self.bioshare_id), self.submission.lab.plugins['bioshare']['private']['token'], {'json': perms})
     def share_with_participants(self, email=False):
         perms = {"groups": {}, "users":dict([(p.email, self.ADMIN_PERMISSIONS) for p in self.submission.participants.all()]), "email":email}
         return self.set_permissions(perms)
