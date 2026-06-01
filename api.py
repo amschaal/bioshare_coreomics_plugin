@@ -3,7 +3,7 @@ from dnaorder.models import Submission
 
 from plugins import plugin_submission_decorator
 from plugins.bioshare.config import GET_PERMISSIONS_URL
-from plugins.bioshare.requests import bioshare_get, get_share, parse_share_id
+from plugins.bioshare.requests import bioshare_get, get_share, parse_share_id, BioshareAPIError
 from .permissions import ListOnlyPermission, SubmissionStaffPermission
 from .models import SubmissionShare, BioshareAccount
 from rest_framework.response import Response
@@ -68,6 +68,9 @@ class SubmissionShareViewSet(viewsets.ModelViewSet):
             obj.save()
             serializer = self.get_serializer(obj)
             return Response(serializer.data)
+        except BioshareAPIError:
+            # Already a DRF APIException with parsed detail + upstream status.
+            raise
         except Exception as e:
             raise exceptions.APIException('Unable to import share. Exception: '+ str(e))
 #     def create(self, request, *args, **kwargs):
