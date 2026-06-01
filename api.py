@@ -1,5 +1,6 @@
+from dnaorder.api.permissions import IsStaffPermission
 from rest_framework import viewsets, status, mixins, exceptions, permissions as drf_permissions
-from dnaorder.models import Submission
+from dnaorder.models import Submission, LabPermission
 
 from plugins import plugin_submission_decorator
 from plugins.bioshare.config import GET_PERMISSIONS_URL
@@ -110,3 +111,17 @@ class BioshareAccountViewSet(mixins.CreateModelMixin,
     serializer_class = BioshareAccountSerializer
     model = BioshareAccount
     queryset = BioshareAccount.objects.all()
+
+class ShareViewSet(mixins.ListModelMixin, GenericViewSet):
+    serializer_class = SubmissionShareSerializer
+    model = SubmissionShare
+    authentication_classes = [SessionAuthentication, TokenAuthentication]
+    permission_classes = [IsStaffPermission]
+    queryset = SubmissionShare.objects.all()
+    def get_queryset(self):
+        self.lab_id = self.request.query_params.get('lab_id', None)
+        if not self.lab_id:
+            raise exceptions.PermissionDenied('You must provide a "lab_id" argument.')
+        if LabPermission.objects.filter(user=self.request.user, permission_object__lab_id=self.lab_id).exists() and not self.request.user.is_superuser:
+            raise exceptions.PermissionDenied('You do not have permissions to list submission shares for lab {}'.format(self.lab_id))
+        return SubmissionShare.objects.filter(submission__lab__lab_id=self.lab_id)

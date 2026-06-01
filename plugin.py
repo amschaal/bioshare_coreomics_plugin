@@ -1,7 +1,8 @@
 from plugins import Plugin
-from .urls import urlpatterns
+from .urls import submission_urlpatterns, urlpatterns
 from .forms import form
 class BiosharePlugin(Plugin):
     ID = 'bioshare'
-    SUBMISSION_URLS = urlpatterns
+    URLS = urlpatterns
+    SUBMISSION_URLS = submission_urlpatterns
     FORM = form

@@ -1,14 +1,13 @@
-# from django.conf.urls import include, url
-from .api import SubmissionShareViewSet, BioshareAccountViewSet
+from .api import SubmissionShareViewSet, BioshareAccountViewSet, ShareViewSet
 
 from rest_framework import routers
-# from django.urls import path, include
+
+submission_router = routers.DefaultRouter()
+submission_router.register(r'submission_shares', SubmissionShareViewSet,'SubmissionShare')
+submission_router.register(r'accounts', BioshareAccountViewSet,'BioshareAccount')
 
 router = routers.DefaultRouter()
-router.register(r'submission_shares', SubmissionShareViewSet,'SubmissionShare')
-router.register(r'accounts', BioshareAccountViewSet,'BioshareAccount')
+router.register(r'shares', ShareViewSet,'Share')
 
-# urlpatterns = [
-#     path(r'^api/', include(router.urls)),
-# ]
+submission_urlpatterns = submission_router.urls
 urlpatterns = router.urls
