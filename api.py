@@ -1,16 +1,17 @@
 from dnaorder.api.permissions import IsStaffPermission
 from rest_framework import viewsets, status, mixins, exceptions, permissions as drf_permissions
-from dnaorder.models import Submission, LabPermission
+from rest_framework.generics import get_object_or_404
+from dnaorder.models import Submission, Lab
+from dnaorder.utils import get_site_institution
 
 from plugins import plugin_submission_decorator
 from plugins.bioshare.config import GET_PERMISSIONS_URL
 from plugins.bioshare.requests import bioshare_get, get_share, parse_share_id, BioshareAPIError
 from .permissions import ListOnlyPermission, SubmissionStaffPermission
-from .models import SubmissionShare, BioshareAccount
+from .models import SubmissionShare
 from rest_framework.response import Response
 from rest_framework.viewsets import GenericViewSet
-from .serializers import SubmissionShareSerializer,\
-    BioshareAccountSerializer
+from .serializers import SubmissionShareSerializer
 from rest_framework.decorators import action
 from rest_framework.authentication import SessionAuthentication,\
     TokenAuthentication
@@ -35,8 +36,10 @@ class SubmissionShareViewSet(viewsets.ModelViewSet):
         # print('get_queryset',self.kwargs)
         self.submission_id = self.kwargs.get('submission_id')
         self.plugin_id = self.kwargs.get('plugin_id')
-        self.submission = Submission.objects.get(id=self.submission_id)
+        self.submission = get_object_or_404(Submission, id=self.submission_id)
         return SubmissionShare.objects.filter(submission=self.submission)
+    def perform_create(self, serializer):
+        serializer.save(submission=get_object_or_404(Submission, id=self.kwargs['submission_id']))
     @action(detail=True, methods=['GET'], permission_classes=[SubmissionStaffPermission])
     # @plugin_submission_decorator(permissions=['VIEW'], all=True)
     def permissions(self, request, pk=None, submission_id=None, plugin_id=None):
@@ -62,7 +65,7 @@ class SubmissionShareViewSet(viewsets.ModelViewSet):
         share_id = parse_share_id(url)
         if not share_id:
             raise exceptions.NotAcceptable('Bad URL.  Ensure that the URL contains the 15 digit alphanumeric share ID.')
-        submission = Submission.objects.get(id=submission_id)
+        submission = get_object_or_404(Submission, id=submission_id)
         try:
             share = get_share(submission.lab.plugins['bioshare']['private']['token'], share_id)#bioshare_get(GET_PERMISSIONS_URL.format(id=share_id), submission.lab.plugins['bioshare']['private']['token'])
             obj = SubmissionShare(bioshare_id = share_id, name=share['name'], notes=share['notes'], submission=submission)
@@ -103,15 +106,6 @@ class SubmissionShareViewSet(viewsets.ModelViewSet):
 #         stats = obj.set_paths(paths)
 #         return Response({'status': 'success','stats':stats,'symlinks':obj.symlinks(recalculate=True)})
 
-class BioshareAccountViewSet(mixins.CreateModelMixin,
-                   mixins.RetrieveModelMixin,
-                   mixins.UpdateModelMixin,
-                   mixins.DestroyModelMixin,
-                   GenericViewSet):
-    serializer_class = BioshareAccountSerializer
-    model = BioshareAccount
-    queryset = BioshareAccount.objects.all()
-
 class ShareViewSet(mixins.ListModelMixin, GenericViewSet):
     serializer_class = SubmissionShareSerializer
     model = SubmissionShare
@@ -122,6 +116,7 @@ class ShareViewSet(mixins.ListModelMixin, GenericViewSet):
         self.lab_id = self.request.query_params.get('lab_id', None)
         if not self.lab_id:
             raise exceptions.PermissionDenied('You must provide a "lab_id" argument.')
-        if LabPermission.objects.filter(user=self.request.user, permission_object__lab_id=self.lab_id).exists() and not self.request.user.is_superuser:
+        lab = Lab.objects.filter(lab_id=self.lab_id, institution=get_site_institution(self.request)).first()
+        if not lab or not lab.is_lab_member(self.request.user):
             raise exceptions.PermissionDenied('You do not have permissions to list submission shares for lab {}'.format(self.lab_id))
-        return SubmissionShare.objects.filter(submission__lab__lab_id=self.lab_id)
+        return SubmissionShare.objects.filter(submission__lab=lab)

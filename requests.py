@@ -46,7 +46,6 @@ def _parse_bioshare_error(body, upstream_status):
 
 
 def bioshare_request(url, token, data=None):
-    print('bioshare url', url, 'token', token)
     if data:
         req = urllib.request.Request(url, data=json.dumps(data).encode('utf8'))
     else:
