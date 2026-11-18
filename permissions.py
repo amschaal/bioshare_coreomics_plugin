@@ -12,5 +12,7 @@ class SubmissionStaffPermission(permissions.BasePermission):
         return obj.submission.has_permission(request.user, self.STAFF, all=False)
 
 class ListOnlyPermission(permissions.BasePermission):
+    """Signed-in users may list a submission's shares; the viewset's queryset
+    limits that to submissions they can open."""
     def has_permission(self, request, view):
-        return view.action == 'list'
+        return bool(request.user and request.user.is_authenticated) and view.action == 'list'

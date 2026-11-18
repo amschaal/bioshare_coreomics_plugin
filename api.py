@@ -36,10 +36,10 @@ class SubmissionShareViewSet(viewsets.ModelViewSet):
         # print('get_queryset',self.kwargs)
         self.submission_id = self.kwargs.get('submission_id')
         self.plugin_id = self.kwargs.get('plugin_id')
-        self.submission = get_object_or_404(Submission, id=self.submission_id)
+        self.submission = get_object_or_404(Submission.objects.visible_to(self.request.user), id=self.submission_id)
         return SubmissionShare.objects.filter(submission=self.submission)
     def perform_create(self, serializer):
-        serializer.save(submission=get_object_or_404(Submission, id=self.kwargs['submission_id']))
+        serializer.save(submission=get_object_or_404(Submission.objects.visible_to(self.request.user), id=self.kwargs['submission_id']))
     @action(detail=True, methods=['GET'], permission_classes=[SubmissionStaffPermission])
     # @plugin_submission_decorator(permissions=['VIEW'], all=True)
     def permissions(self, request, pk=None, submission_id=None, plugin_id=None):
